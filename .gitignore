@@ -1,2 +1,5 @@
 .venv
-set_env.sh
+.env
+requirements.txt
+data
+*.sqlite3

@@ -1,4 +1,0 @@
-import os
-
-ITUNES_MUSIC_LIBRARY = os.environ.get('ITUNES_MUSIC_LIBRARY')
-print(ITUNES_MUSIC_LIBRARY)
