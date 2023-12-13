@@ -10,4 +10,24 @@ services:
     ports:
       - "5432:5432"
     volumes:
-       - ../data:/var/lib/postgresql/data
+      - ../data:/var/lib/postgresql/data
+    networks:
+      - cronpg_network
+
+  
+  cronpg:
+    build: 
+      context: ./cronpg
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - /mnt/win_Music/iTunes:/mnt/win_Music/iTunes
+    depends_on: 
+      - db
+    networks:
+      - cronpg_network
+
+networks:
+  cronpg_network:
+    driver: bridge
