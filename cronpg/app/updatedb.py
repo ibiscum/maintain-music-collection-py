@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2 import Error
 import datetime
 import hashlib
-import pprint
+# import pprint
 from settings import ITUNES_LIBRARY_FILE, ITUNES_MUSIC_DIR, \
     POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_HOST
 
@@ -27,11 +27,7 @@ def connect_db():
         print(error)
 
 
-def create_table():
-    conn = connect_db()
-    cur = conn.cursor()
-
-    command = 'CREATE TABLE IF NOT EXISTS itunes_data (\
+table_itunes_data = 'CREATE TABLE IF NOT EXISTS itunes_data (\
         persistent_id varchar(100) PRIMARY KEY, \
         track_id integer,           \
         track_name text,            \
@@ -52,6 +48,10 @@ def create_table():
         artwork_count smallint,     \
         md5_id varchar(100));'
 
+
+def create_table(command):
+    conn = connect_db()
+    cur = conn.cursor()
     cur.execute(command)
     conn.commit()
     conn.close()
@@ -134,7 +134,7 @@ def prepare_tracks():
             volume_adjustment = track['Volume Adjustment']
         except KeyError:
             volume_adjustment = 0
-        volume_adjustment_b = volume_adjustment.to_bytes(byteorder='little',
+        volume_adjustment_b = volume_adjustment.to_bytes(2, byteorder='little',
                                                          signed=True)
 
         try:
@@ -204,79 +204,86 @@ def prepare_tracks():
 
 
 def persist_tracks():
+    ct = datetime.datetime.now()
+    ts = ct.timestamp()
+    print("cronpg: ", ts)
+    # pp = pprint.PrettyPrinter()
+
     conn = connect_db()
     cur = conn.cursor()
+
+    id_data = get_ids()
+    # pp.pprint(id_data)
+
     tracks_db = prepare_tracks()
-    pp = pprint.PrettyPrinter()
 
     for track in tracks_db:
-        pp.pprint(track)
+        if track.get('md5_id') not in id_data:
+            command = '''INSERT INTO itunes_data (
+                persistent_id,
+                track_id,
+                track_name,
+                artist,
+                album_artist,
+                album, genre,
+                disc_number,
+                disc_count,
+                track_number,
+                track_count,
+                album_year,
+                date_modified,
+                date_added,
+                volume_adjustment,
+                play_count,
+                play_date_utc,
+                artwork_count,
+                md5_id)
+                VALUES (
+                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s)
+                ON CONFLICT (persistent_id) DO UPDATE SET
+                    track_id          = EXCLUDED.track_id,
+                    track_name        = EXCLUDED.track_name,
+                    artist            = EXCLUDED.artist,
+                    album_artist      = EXCLUDED.album_artist,
+                    album             = EXCLUDED.album,
+                    genre             = EXCLUDED.genre,
+                    disc_number       = EXCLUDED.disc_number,
+                    disc_count        = EXCLUDED.disc_count,
+                    track_number      = EXCLUDED.track_number,
+                    track_count       = EXCLUDED.track_count,
+                    album_year        = EXCLUDED.album_year,
+                    date_modified     = EXCLUDED.date_modified,
+                    date_added        = EXCLUDED.date_added,
+                    volume_adjustment = EXCLUDED.volume_adjustment,
+                    play_count        = EXCLUDED.play_count,
+                    play_date_utc     = EXCLUDED.play_date_utc,
+                    artwork_count     = EXCLUDED.artwork_count,
+                    md5_id            = EXCLUDED.md5_id;'''
 
-        command = '''INSERT INTO itunes_data (
-            persistent_id,
-            track_id,
-            track_name,
-            artist,
-            album_artist,
-            album, genre,
-            disc_number,
-            disc_count,
-            track_number,
-            track_count,
-            album_year,
-            date_modified,
-            date_added,
-            volume_adjustment,
-            play_count,
-            play_date_utc,
-            artwork_count,
-            md5_id)
-            VALUES (
-                %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s,
-                %s, %s, %s, %s)
-            ON CONFLICT (persistent_id) DO UPDATE SET
-            track_id          = EXCLUDED.track_id,
-            track_name        = EXCLUDED.track_name,
-            artist            = EXCLUDED.artist,
-            album_artist      = EXCLUDED.album_artist,
-            album             = EXCLUDED.album,
-            genre             = EXCLUDED.genre,
-            disc_number       = EXCLUDED.disc_number,
-            disc_count        = EXCLUDED.disc_count,
-            track_number      = EXCLUDED.track_number,
-            track_count       = EXCLUDED.track_count,
-            album_year        = EXCLUDED.album_year,
-            date_modified     = EXCLUDED.date_modified,
-            date_added        = EXCLUDED.date_added,
-            volume_adjustment = EXCLUDED.volume_adjustment,
-            play_count        = EXCLUDED.play_count,
-            play_date_utc     = EXCLUDED.play_date_utc,
-            artwork_count     = EXCLUDED.artwork_count,
-            md5_id            = EXCLUDED.md5_id;'''
-
-        cur.execute(command, (
-            track.get('persistent_id'),
-            track.get('track_id'),
-            track.get('track_name'),
-            track.get('artist'),
-            track.get('album_artist'),
-            track.get('album'),
-            track.get('genre'),
-            track.get('disc_number'),
-            track.get('disc_count'),
-            track.get('track_number'),
-            track.get('track_count'),
-            track.get('album_year'),
-            track.get('date_modified'),
-            track.get('date_added'),
-            track.get('volume_adjustment'),
-            track.get('play_count'),
-            track.get('play_date_utc'),
-            track.get('artwork_count'),
-            track.get('md5_id'))
-        )
+            cur.execute(command, (
+                track.get('persistent_id'),
+                track.get('track_id'),
+                track.get('track_name'),
+                track.get('artist'),
+                track.get('album_artist'),
+                track.get('album'),
+                track.get('genre'),
+                track.get('disc_number'),
+                track.get('disc_count'),
+                track.get('track_number'),
+                track.get('track_count'),
+                track.get('album_year'),
+                track.get('date_modified'),
+                track.get('date_added'),
+                track.get('volume_adjustment'),
+                track.get('play_count'),
+                track.get('play_date_utc'),
+                track.get('artwork_count'),
+                track.get('md5_id'))
+            )
 
     conn.commit()
     conn.close()
@@ -286,8 +293,12 @@ def get_ids():
     conn = connect_db()
     cur = conn.cursor()
 
-    command = '''SELECT persistent_id, md5_id FROM itunes_data;'''
+    command = '''SELECT md5_id, persistent_id FROM itunes_data;'''
     cur.execute(command)
 
     id_data = cur.fetchall()
-    return id_data
+
+    conn.commit()
+    conn.close()
+
+    return dict(id_data)

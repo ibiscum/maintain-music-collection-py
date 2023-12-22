@@ -11,7 +11,7 @@ RUN apt-get update && \
 RUN python3 -m venv /venv
 ENV PATH=/venv/bin:$PATH
 
-WORKDIR /app
+WORKDIR /opt
 COPY requirements.txt .
 
 RUN pip install --upgrade pip && \
@@ -30,15 +30,16 @@ RUN groupadd --gid $USER_GID $USERNAME && \
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
-    apt-get install --no-install-recommends --assume-yes libpq5
+    apt-get install --no-install-recommends --assume-yes libpq5 && \
+    apt-get clean
 
-WORKDIR /app
+WORKDIR /opt
 
 COPY --from=builder /venv /venv
 ENV PATH=/venv/bin:$PATH
 
-# Copy the application in.
-COPY *.py .
+# Copy the application in .
+COPY . .
 USER cronpg
 
-CMD [ "python3", "cronpg.py" ]
+CMD [ "python3", "/opt/app/cronpg.py" ]

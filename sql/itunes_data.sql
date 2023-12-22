@@ -1,9 +1,8 @@
 -- itunes_data definition
-
 CREATE TABLE itunes_data (
 	persistent_id varchar(100) PRIMARY KEY,
 	track_id integer,
-	name text,
+	track_name text,
 	artist text,
 	album_artist text,
 	album text,
@@ -12,7 +11,7 @@ CREATE TABLE itunes_data (
 	disc_count smallint,
 	track_number smallint,
 	track_count smallint,
-	year date,
+	album_year date,
 	date_modified timestamp,
 	date_added timestamp,
 	volume_adjustment smallint,
@@ -26,7 +25,7 @@ CREATE TABLE itunes_data (
 CREATE TABLE itunes_data_tmp (
 	persistent_id varchar(100),
 	track_id integer,
-	name text,
+	track_name text,
 	artist text,
 	album_artist text,
 	album text,
@@ -35,7 +34,7 @@ CREATE TABLE itunes_data_tmp (
 	disc_count smallint,
 	track_number smallint,
 	track_count smallint,
-	year date,
+	album_year date,
 	date_modified timestamp,
 	date_added timestamp,
 	volume_adjustment smallint,
@@ -49,7 +48,7 @@ CREATE TABLE itunes_data_tmp (
 CREATE TABLE itunes_data_log (
 	persistent_id varchar(100) references itunes_data(persistent_id),
 	track_id integer,
-	name text,
+	track_name text,
 	artist text,
 	album_artist text,
 	album text,
@@ -58,7 +57,7 @@ CREATE TABLE itunes_data_log (
 	disc_count smallint,
 	track_number smallint,
 	track_count smallint,
-	year date,
+	album_year date,
 	date_modified timestamp,
 	date_added timestamp,
 	volume_adjustment smallint,
@@ -78,10 +77,28 @@ DELETE FROM itunes_data;
 -- also LOGS this change in itunes_data_log
 CREATE TRIGGER IF NOT EXISTS tr_insert_itunes_data_tmp AFTER INSERT ON itunes_data_tmp
 BEGIN
-	INSERT INTO itunes_data_log (persistent_id, track_id, "name", artist, album_artist, album, genre, disc_number,
-  		disc_count, track_number, track_count, "year", date_modified, date_added, volume_adjustment, play_count,
-  		play_date_utc, artwork_count, md5_id)
-  	SELECT NEW.persistent_id, NEW.track_id, NEW."name", NEW.artist, NEW.album_artist, NEW.album, NEW.genre, NEW.disc_number,
+	INSERT INTO itunes_data_log (
+		persistent_id, 
+		track_id,
+		track_name,
+		artist,
+		album_artist,
+		album, genre,
+		disc_number,
+  		disc_count,
+		track_number,
+		track_count,
+		album_year,
+		date_modified,
+		date_added,
+		volume_adjustment,
+		play_count,
+  		play_date_utc,
+		artwork_count,
+		md5_id)
+  	SELECT
+		NEW.persistent_id,
+		NEW.track_id, NEW."name", NEW.artist, NEW.album_artist, NEW.album, NEW.genre, NEW.disc_number,
   		NEW.disc_count, NEW.track_number, NEW.track_count, NEW."year", NEW.date_modified, NEW.date_added, NEW.volume_adjustment,
   		NEW.play_count,	NEW.play_date_utc, NEW.artwork_count, NEW.md5_id
   	FROM itunes_data id
@@ -159,3 +176,18 @@ BEGIN
     FROM itunes_data
     WHERE persistent_id = OLD.persistent_id;
 END;
+
+
+-- -------------------------
+-- POSTGRES SPECIFIC LOGGING
+-- --------------------------
+CREATE TABLE IF NOT EXISTS itunes_data_audit_log (
+    persistent_id varchar(100) NOT NULL,
+    old_row_data jsonb,
+    new_row_data jsonb,
+    dml_type dml_type NOT NULL,
+    dml_timestamp timestamp NOT NULL,
+    PRIMARY KEY (persistent_id, dml_type, dml_timestamp)
+);
+
+CREATE TYPE dml_type AS ENUM ('INSERT', 'UPDATE', 'DELETE');

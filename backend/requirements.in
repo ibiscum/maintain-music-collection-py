@@ -1,0 +1,11 @@
+databases[postgresql]
+psycopg2-binary
+python-dotenv
+SQLAlchemy
+asyncpg
+fastapi
+uvicorn
+
+# dev
+pytest
+httpx

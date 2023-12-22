@@ -1,0 +1,52 @@
+# compose.yml
+version: '3.1'
+services:
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cronpg_network
+
+  
+  cronpg:
+    build: 
+      context: ./cronpg
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - /mnt/win_Music/iTunes:/mnt/win_Music/iTunes
+    depends_on: 
+      db:
+        condition: service_healthy
+    networks:
+      - cronpg_network
+    
+    
+  backend:
+    build: .
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn app.main:app --host 0.0.0.0'
+    volumes:
+      - .:/app
+    expose:
+      - 8000
+    environment:
+      - DATABASE_URL=postgresql://fastapi_traefik:fastapi_traefik@db:5432/fastapi_traefik
+    depends_on:
+      - db
+
+networks:
+  cronpg_network:
+    driver: bridge
