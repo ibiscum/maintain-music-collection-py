@@ -17,7 +17,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# final stage
+# Final stage
 FROM python:slim
 
 ARG USERNAME=cronpg

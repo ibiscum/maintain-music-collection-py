@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:slim
+FROM python:slim as builder
 
 # set work directory
 WORKDIR /opt
@@ -8,17 +8,42 @@ WORKDIR /opt
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# copy requirements file
-COPY ./requirements.txt /usr/src/app/requirements.txt
-
 # install dependencies
-RUN set -eux \
-    && apk add --no-cache --virtual .build-deps build-base \
-        openssl-dev libffi-dev gcc musl-dev python3-dev \
-        postgresql-dev bash \
-    && pip install --upgrade pip setuptools wheel \
-    && pip install -r /usr/src/app/requirements.txt \
-    && rm -rf /root/.cache/pip
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes build-essential libpq-dev python3-dev
 
-# copy project
-COPY . /usr/src/app/
+# Create the virtual environment.
+RUN python3 -m venv /venv
+ENV PATH=/venv/bin:$PATH
+
+COPY requirements.txt .
+
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Final stage
+FROM python:slim
+
+ARG USERNAME=backend
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Create the user
+RUN groupadd --gid $USER_GID $USERNAME && \
+    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes libpq5 && \
+    apt-get clean
+
+WORKDIR /opt
+
+COPY --from=builder /venv /venv
+
+# Copy the application in .
+COPY . .
+USER backend
+
+CMD [ "uvicorn", "app.main:app", "--host", "0.0.0.0" ]

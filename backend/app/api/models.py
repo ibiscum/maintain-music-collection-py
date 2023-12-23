@@ -1,8 +1,9 @@
-from pydantic import BaseModel, Field
-from datetime import date, datetime, time, timedelta
+from pydantic import BaseModel
+from datetime import date, datetime
 
 
 class ItunesDataSchema(BaseModel):
+    persistent_id: str
     track_id: int
     track_name: str
     artist: str

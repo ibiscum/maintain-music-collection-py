@@ -11,7 +11,8 @@ from sqlalchemy import (
     Table,
     create_engine
 )
-from sqlalchemy.sql import func
+
+# from sqlalchemy.sql import func
 
 from databases import Database
 from app.settings import DATABASE_URL
