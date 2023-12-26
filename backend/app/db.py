@@ -17,8 +17,6 @@ from sqlalchemy import (
 from databases import Database
 from app.settings import DATABASE_URL
 
-# DATABASE_URL = os.getenv("DATABASE_URL")
-
 # SQLAlchemy
 engine = create_engine(DATABASE_URL)
 metadata = MetaData()

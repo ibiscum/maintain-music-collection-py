@@ -1,8 +1,8 @@
-from app.api.models import ItunesDataSchema
+from app.api.models import ItunesDataSchema, ItunesDataDB
 from app.db import itunes_data, database
 
 
-async def post(payload: ItunesDataSchema):
+async def post(payload: ItunesDataDB):
     query = itunes_data.insert().values(
         persistent_id=payload.persistent_id,
         track_id=payload.track_id,
@@ -24,7 +24,6 @@ async def post(payload: ItunesDataSchema):
         artwork_count=payload.artwork_count,
         md5_id=payload.md5_id
     )
-
     return await database.execute(query=query)
 
 
@@ -40,10 +39,8 @@ async def get_all():
 
 
 async def put(persistent_id: str, payload: ItunesDataSchema):
-    query = (
-        itunes_data
-        .update()
-        .where(persistent_id == itunes_data.c.persistent_id)
+    query = (itunes_data.update().where(
+        persistent_id == itunes_data.c.persistent_id)
         .values(
             track_id=payload.track_id,
             track_name=payload.track_name,

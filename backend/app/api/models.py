@@ -3,7 +3,6 @@ from datetime import date, datetime
 
 
 class ItunesDataSchema(BaseModel):
-    persistent_id: str
     track_id: int
     track_name: str
     artist: str

@@ -9,12 +9,11 @@ router = APIRouter()
 
 
 @router.post("/", response_model=ItunesDataDB, status_code=201)
-async def create_entry(payload: ItunesDataSchema):
-    persistent_id = await crud.post(payload)
-    print(persistent_id)
+async def create_entry(payload: ItunesDataDB):
+    await crud.post(payload)
 
     response_object = {
-        "persistent_id": persistent_id,
+        "persistent_id": payload.persistent_id,
         "track_id": payload.track_id,
         "track_name": payload.track_name,
         "artist": payload.artist,
@@ -38,7 +37,7 @@ async def create_entry(payload: ItunesDataSchema):
     return response_object
 
 
-@router.get("/{persistent_id}/", response_model=ItunesDataDB)
+@router.get("/{persistent_id}", response_model=ItunesDataDB)
 async def read_entry(persistent_id: str = Path(..., ),):
     item = await crud.get(persistent_id)
     if not item:
@@ -51,7 +50,7 @@ async def read_all_entries():
     return await crud.get_all()
 
 
-@router.put("/{persistent_id}/", response_model=ItunesDataDB)
+@router.put("/{persistent_id}", response_model=ItunesDataDB)
 async def update_note(payload: ItunesDataSchema,
                       persistent_id: str = Path(..., ),):
     persistent_id = await crud.get(persistent_id)
@@ -85,13 +84,14 @@ async def update_note(payload: ItunesDataSchema,
     return response_object
 
 
-@router.delete("/{persistent_id}/", response_model=ItunesDataDB)
+@router.delete("/{persistent_id}", response_model=ItunesDataDB,
+               summary="Delete Entry")
 async def delete_note(persistent_id: str = Path(..., )):
-    track = await crud.get(persistent_id)
+    item = await crud.get(persistent_id)
 
-    if not track:
+    if not item:
         raise HTTPException(status_code=404, detail="Entry not found")
 
     await crud.delete(persistent_id)
 
-    return track
+    return item
