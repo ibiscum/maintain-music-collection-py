@@ -233,7 +233,6 @@ def test_read_all_tracks(test_app, monkeypatch):
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_update_track(test_app, monkeypatch):
     test_data = {
-        "persistent_id": "TESTTESTTESTTEST",
         "track_id": 100000,
         "track_name": "Test_Update",
         "artist": "Test_Update",
@@ -251,11 +250,12 @@ def test_update_track(test_app, monkeypatch):
         "play_count": 0,
         "play_date_utc": "1970-02-02T00:00:00",
         "artwork_count": 0,
-        "md5_id": "ffff0000ffff0000ffff0000ffffaaaa"
+        "md5_id": "ffff0000ffff0000ffff0000ffffaaaa",
+        "persistent_id": "TESTTESTTESTTEST"
     }
 
     async def mock_get(id):
-        return True
+        return test_data
 
     monkeypatch.setattr(crud, "get", mock_get)
 
@@ -264,7 +264,7 @@ def test_update_track(test_app, monkeypatch):
 
     monkeypatch.setattr(crud, "put", mock_put)
 
-    response = test_app.put("/itunes_data/TESTTESTTESTTEST",
+    response = test_app.put("TESTTESTTESTTEST",
                             content=json.dumps(test_data))
     assert response.status_code == 200
     assert response.json() == test_data

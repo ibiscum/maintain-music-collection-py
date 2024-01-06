@@ -15,10 +15,10 @@ from sqlalchemy import (
 # from sqlalchemy.sql import func
 
 from databases import Database
-from app.settings import DATABASE_URL
+from app.settings import POSTGRES_DB_URL
 
 # SQLAlchemy
-engine = create_engine(DATABASE_URL)
+engine = create_engine(POSTGRES_DB_URL)
 metadata = MetaData()
 itunes_data = Table(
     "itunes_data",
@@ -44,5 +44,13 @@ itunes_data = Table(
     Column("md5_id", String(100))
 )
 
+itunes_data_play_month = Table(
+    "itunes_data_play_month",
+    metadata,
+    Column("album_artist", Text),
+    Column("play_at", DateTime),
+    Column("play_count", Integer)
+)
+
 # databases query builder
-database = Database(DATABASE_URL)
+database = Database(POSTGRES_DB_URL)

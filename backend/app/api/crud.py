@@ -1,5 +1,5 @@
 from app.api.models import ItunesDataSchema, ItunesDataDB
-from app.db import itunes_data, database
+from app.db import itunes_data, itunes_data_play_month, database
 
 
 async def post(payload: ItunesDataDB):

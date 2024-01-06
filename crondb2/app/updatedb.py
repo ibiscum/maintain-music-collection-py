@@ -1,7 +1,7 @@
 import plistlib
 import re
-import psycopg2
-from psycopg2 import Error
+# import ibm_db
+import ibm_db_dbi as db
 import datetime
 import hashlib
 # import pprint
@@ -16,37 +16,35 @@ def subst_quote(input):
 
 def connect_db():
     try:
-        conn = psycopg2.connect(
-            user='postgres',
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port='5432',
-            database=DB_SCHEMA)
+        conn = db.connect("DATABASE=" + DB_SCHEMA + ";HOSTNAME=" + DB_HOST +
+                          ";PORT=50000; PROTOCOL=TCPIP; UID=db2inst1;\
+                          PWD=" + DB_PASSWORD + ";", "", "")
+
         return conn
-    except (Exception, Error) as error:
-        print(error)
+    except Exception as e:
+        print(e)
 
 
-table_itunes_data = 'CREATE TABLE IF NOT EXISTS itunes_data (\
-        persistent_id varchar(100) PRIMARY KEY, \
-        track_id integer,           \
-        track_name text,            \
-        artist text,                \
-        album_artist text,          \
-        album text,                 \
-        genre varchar(100),         \
-        disc_number smallint,       \
-        disc_count smallint,        \
-        track_number smallint,      \
-        track_count smallint,       \
-        album_year date,            \
-        date_modified timestamp,    \
-        date_added timestamp,       \
-        volume_adjustment smallint, \
-        play_count integer,         \
-        play_date_utc timestamp,    \
-        artwork_count smallint,     \
-        md5_id varchar(100));'
+table_itunes_data = 'CREATE TABLE IF NOT EXISTS ' + DB_SCHEMA + '.itunes_data \
+    (persistent_id varchar(100) PRIMARY KEY NOT null, \
+    track_id integer, \
+    track_name varchar(500), \
+    artist varchar(500), \
+    album_artist varchar(500), \
+    album varchar(500), \
+    genre varchar(100), \
+    disc_number smallint, \
+    disc_count smallint, \
+    track_number smallint, \
+    track_count smallint, \
+    album_year date, \
+    date_modified timestamp, \
+    date_added timestamp, \
+    volume_adjustment smallint, \
+    play_count integer, \
+    play_date_utc timestamp, \
+    artwork_count smallint, \
+    md5_id varchar(100));'
 
 
 def create_table(command):
@@ -204,13 +202,15 @@ def prepare_tracks():
 
 
 def persist_tracks():
-    # ct = datetime.datetime.now()
-    # ts = ct.timestamp()
+    ct = datetime.datetime.now()
+    ts = ct.timestamp()
+    print("cronpg: ", ts)
 
     conn = connect_db()
     cur = conn.cursor()
 
     id_data = get_ids()
+    # pp.pprint(id_data)
 
     tracks_db = prepare_tracks()
 
@@ -290,7 +290,8 @@ def get_ids():
     conn = connect_db()
     cur = conn.cursor()
 
-    command = '''SELECT md5_id, persistent_id FROM itunes_data;'''
+    command = 'SELECT md5_id, persistent_id FROM ' + DB_SCHEMA + \
+        '.itunes_data;'
     cur.execute(command)
 
     id_data = cur.fetchall()

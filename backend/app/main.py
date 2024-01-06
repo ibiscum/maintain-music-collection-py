@@ -39,3 +39,5 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(ping.router)
 app.include_router(itunes_data.router, prefix="/itunes_data",
                    tags=["itunes_data"])
+app.include_router(itunes_data_play_month.router, prefix="/itunes_data_play_month",
+                   tags=["itunes_data_play_month"])

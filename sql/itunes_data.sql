@@ -1,4 +1,4 @@
--- itunes_data definition
+-- itunes_data definition PostgreSQL
 CREATE TABLE itunes_data (
 	persistent_id varchar(100) PRIMARY KEY,
 	track_id integer,
