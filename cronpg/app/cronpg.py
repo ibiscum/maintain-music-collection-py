@@ -3,7 +3,7 @@ import time
 from updatedb import create_table, persist_tracks, table_itunes_data
 
 
-@repeat(every(10).minutes)
+@repeat(every(3).minutes)
 def job():
     persist_tracks()
 

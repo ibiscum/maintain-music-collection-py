@@ -3,7 +3,7 @@ import re
 import psycopg2
 from psycopg2 import Error
 import datetime
-import hashlib
+from hashlib import sha256
 # import pprint
 from settings import ITUNES_LIBRARY_FILE, ITUNES_MUSIC_DIR, \
     DB_PASSWORD, DB_SCHEMA, DB_HOST
@@ -46,7 +46,7 @@ table_itunes_data = 'CREATE TABLE IF NOT EXISTS itunes_data (\
         play_count integer,         \
         play_date_utc timestamp,    \
         artwork_count smallint,     \
-        md5_id varchar(100));'
+        sha256_id varchar(100));'
 
 
 def create_table(command):
@@ -71,64 +71,80 @@ def prepare_tracks():
     tracks = load_tracks()
 
     for track in tracks.values():
+        h = sha256()
+
         persistent_id = track['Persistent ID']
+        print(persistent_id)
 
         track_id = track['Track ID']
-        track_id_b = bytes(track_id)
+        track_id_b = track_id.to_bytes(4, 'little')
+        h.update(track_id_b)
 
         track_name = track['Name']
         track_name_b = bytes(track_name, 'utf-8')
+        h.update(track_name_b)
 
         artist = track['Artist']
         artist_b = bytes(artist, 'utf-8')
+        h.update(artist_b)
 
         album_artist = track['Album Artist']
         album_artist_b = bytes(album_artist, 'utf-8')
+        h.update(album_artist_b)
 
         album = track['Album']
         album_b = bytes(album, 'utf-8')
+        h.update(album_b)
 
         try:
             genre = track['Genre']
         except KeyError:
             genre = 'not set'
         genre_b = bytes(genre, 'utf-8')
+        h.update(genre_b)
 
         try:
             disc_number = track['Disc Number']
         except KeyError:
             disc_number = 0
-        disc_number_b = bytes(disc_number)
+        disc_number_b = disc_number.to_bytes(2, 'little')
+        h.update(disc_number_b)
 
         try:
             disc_count = track['Disc Count']
         except KeyError:
             disc_count = 0
-        disc_count_b = bytes(disc_count)
+        disc_count_b = disc_count.to_bytes(2, 'little')
+        h.update(disc_count_b)
 
         try:
             track_number = track['Track Number']
         except KeyError:
             track_number = 0
-        track_number_b = bytes(track_number)
+        track_number_b = track_number.to_bytes(2, 'little')
+        h.update(track_number_b)
 
         try:
             track_count = track['Track Count']
         except KeyError:
             track_count = 0
-        track_count_b = bytes(track_count)
+        track_count_b = track_count.to_bytes(2, 'little')
+        h.update(track_count_b)
 
         try:
             album_year = str(track['Year']) + '-01-01'
         except KeyError:
             album_year = '1970-01-01'
         album_year_b = bytes(album_year, 'utf-8')
+        h.update(album_year_b)
 
         date_modified = track['Date Modified']
         date_modified_b = bytes(date_modified.strftime('%s'), 'utf-8')
+        h.update(date_modified_b)
 
         date_added = track['Date Added']
         date_added_b = bytes(date_added.strftime('%s'), 'utf-8')
+        h.update(date_added_b)
 
         try:
             volume_adjustment = track['Volume Adjustment']
@@ -136,45 +152,33 @@ def prepare_tracks():
             volume_adjustment = 0
         volume_adjustment_b = volume_adjustment.to_bytes(2, byteorder='little',
                                                          signed=True)
+        h.update(volume_adjustment_b)
 
         try:
             play_count = track['Play Count']
         except KeyError:
             play_count = 0
-        play_count_b = bytes(play_count)
+        play_count_b = play_count.to_bytes(2, 'little')
+        h.update(play_count_b)
 
         try:
             play_date_utc = track['Play Date UTC']
         except KeyError:
             play_date_utc = datetime.datetime(1970, 1, 1, 0, 0, 0)
         play_date_utc_b = bytes(play_date_utc.strftime('%s'), 'utf-8')
+        h.update(play_date_utc_b)
 
         try:
             artwork_count = track['Artwork Count']
         except KeyError:
             artwork_count = 0
-        artwork_count_b = bytes(artwork_count)
+        artwork_count_b = artwork_count.to_bytes(2, 'little')
+        h.update(artwork_count_b)
 
-        elements_b = b''.join([
-            track_id_b,
-            track_name_b,
-            artist_b,
-            album_artist_b,
-            album_b,
-            genre_b,
-            disc_number_b,
-            disc_count_b,
-            track_number_b,
-            track_count_b,
-            album_year_b,
-            date_modified_b,
-            date_added_b,
-            volume_adjustment_b,
-            play_count_b,
-            play_date_utc_b,
-            artwork_count_b])
+        sha256_id = h.hexdigest()
 
-        md5_id = hashlib.md5(elements_b).hexdigest()
+        print(sha256_id)
+        print("----------------------\n")
 
         track_item = {
             'persistent_id': persistent_id,
@@ -195,7 +199,7 @@ def prepare_tracks():
             'play_count': play_count,
             'play_date_utc': play_date_utc,
             'artwork_count': artwork_count,
-            'md5_id': md5_id
+            'sha256_id': sha256_id
         }
 
         tracks_db.append(track_item)
@@ -215,7 +219,7 @@ def persist_tracks():
     tracks_db = prepare_tracks()
 
     for track in tracks_db:
-        if track.get('md5_id') not in id_data:
+        if track.get('sha256_id') not in id_data:
             command = '''INSERT INTO itunes_data (
                 persistent_id,
                 track_id,
@@ -234,7 +238,7 @@ def persist_tracks():
                 play_count,
                 play_date_utc,
                 artwork_count,
-                md5_id)
+                sha256_id)
                 VALUES (
                     %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s,
@@ -258,7 +262,7 @@ def persist_tracks():
                     play_count        = EXCLUDED.play_count,
                     play_date_utc     = EXCLUDED.play_date_utc,
                     artwork_count     = EXCLUDED.artwork_count,
-                    md5_id            = EXCLUDED.md5_id;'''
+                    sha256_id            = EXCLUDED.sha256_id;'''
 
             cur.execute(command, (
                 track.get('persistent_id'),
@@ -279,7 +283,7 @@ def persist_tracks():
                 track.get('play_count'),
                 track.get('play_date_utc'),
                 track.get('artwork_count'),
-                track.get('md5_id'))
+                track.get('sha256_id'))
             )
 
     conn.commit()
@@ -290,7 +294,7 @@ def get_ids():
     conn = connect_db()
     cur = conn.cursor()
 
-    command = '''SELECT md5_id, persistent_id FROM itunes_data;'''
+    command = '''SELECT sha256_id, persistent_id FROM itunes_data;'''
     cur.execute(command)
 
     id_data = cur.fetchall()
