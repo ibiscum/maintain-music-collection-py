@@ -8,15 +8,13 @@ greenlet==3.0.3
     # via sqlalchemy
 ibm-db==3.2.1
     # via
-    #   -r requirements.in
+    #   -r crondb2/requirements.in
     #   ibm-db-sa
 ibm-db-sa==0.4.0
-    # via -r requirements.in
+    # via -r crondb2/requirements.in
 python-dotenv==1.0.0
-    # via -r requirements.in
+    # via -r crondb2/requirements.in
 schedule==1.2.1
-    # via -r requirements.in
-sqlalchemy==2.0.24
+    # via -r crondb2/requirements.in
+sqlalchemy==1.4.52
     # via ibm-db-sa
-typing-extensions==4.9.0
-    # via sqlalchemy
