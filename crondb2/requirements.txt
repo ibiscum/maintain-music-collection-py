@@ -18,5 +18,3 @@ schedule==1.2.1
     # via -r crondb2/requirements.in
 sqlalchemy==2.0.24
     # via ibm-db-sa
-typing-extensions==4.9.0
-    # via sqlalchemy
