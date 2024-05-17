@@ -111,10 +111,11 @@ typing-extensions==4.8.0
     #   fastapi
     #   pydantic
     #   pydantic-core
+uvicorn==0.29.0
+    # via -r backend/requirements.in
     #   typer
 ujson==5.9.0
     # via fastapi
-uvicorn[standard]==0.24.0.post1
     # via
     #   -r backend/requirements.in
     #   fastapi
