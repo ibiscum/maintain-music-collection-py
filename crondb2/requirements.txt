@@ -12,9 +12,9 @@ ibm-db==3.2.1
     #   ibm-db-sa
 ibm-db-sa==0.4.0
     # via -r crondb2/requirements.in
-python-dotenv==1.0.0
+python-dotenv==1.0.1
     # via -r crondb2/requirements.in
 schedule==1.2.1
     # via -r crondb2/requirements.in
-sqlalchemy==1.4.52
+sqlalchemy==2.0.24
     # via ibm-db-sa
