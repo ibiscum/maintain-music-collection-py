@@ -10,22 +10,33 @@ anyio==3.7.1
     # via
     #   httpx
     #   starlette
+    #   watchfiles
 async-timeout==4.0.3
     # via asyncpg
 asyncpg==0.29.0
     # via
-    #   -r requirements.in
+    #   -r backend/requirements.in
     #   databases
 certifi==2023.11.17
     # via
     #   httpcore
     #   httpx
 click==8.1.7
-    # via uvicorn
+    # via
+    #   typer
+    #   uvicorn
 databases[postgresql]==0.8.0
-    # via -r requirements.in
-fastapi==0.109.1
-    # via -r requirements.in
+    # via -r backend/requirements.in
+dnspython==2.6.1
+    # via email-validator
+email-validator==2.1.1
+    # via fastapi
+fastapi==0.111.0
+    # via
+    #   -r backend/requirements.in
+    #   fastapi-cli
+fastapi-cli==0.0.3
+    # via fastapi
 greenlet==3.0.1
     # via sqlalchemy
 h11==0.14.0
@@ -34,44 +45,83 @@ h11==0.14.0
     #   uvicorn
 httpcore==1.0.2
     # via httpx
+httptools==0.6.1
+    # via uvicorn
 httpx==0.25.2
     # via -r requirements.in
 idna==3.7
     # via
     #   anyio
+    #   email-validator
     #   httpx
 iniconfig==2.0.0
     # via pytest
+jinja2==3.1.4
+    # via fastapi
+markdown-it-py==3.0.0
+    # via rich
+markupsafe==2.1.5
+    # via jinja2
+mdurl==0.1.2
+    # via markdown-it-py
+orjson==3.10.3
+    # via fastapi
 packaging==23.2
     # via pytest
 pluggy==1.3.0
     # via pytest
 psycopg2-binary==2.9.9
-    # via -r requirements.in
+    # via -r backend/requirements.in
 pydantic==2.5.2
     # via fastapi
 pydantic-core==2.14.5
     # via pydantic
+pygments==2.18.0
+    # via rich
 pytest==7.4.3
-    # via -r requirements.in
+    # via -r backend/requirements.in
 python-dotenv==1.0.0
-    # via -r requirements.in
+    # via
+    #   -r backend/requirements.in
+    #   uvicorn
+python-multipart==0.0.9
+    # via fastapi
+pyyaml==6.0.1
+    # via uvicorn
+rich==13.7.1
+    # via typer
 schedule==1.2.1
-    # via -r requirements.in
+    # via -r backend/requirements.in
+shellingham==1.5.4
+    # via typer
 sniffio==1.3.0
     # via
     #   anyio
     #   httpx
 sqlalchemy==1.4.50
     # via
-    #   -r requirements.in
+    #   -r backend/requirements.in
     #   databases
-starlette==0.35.1
+starlette==0.37.2
     # via fastapi
+typer==0.12.3
+    # via fastapi-cli
 typing-extensions==4.8.0
     # via
     #   fastapi
     #   pydantic
     #   pydantic-core
-uvicorn==0.24.0.post1
-    # via -r requirements.in
+    #   typer
+ujson==5.9.0
+    # via fastapi
+uvicorn[standard]==0.24.0.post1
+    # via
+    #   -r backend/requirements.in
+    #   fastapi
+    #   fastapi-cli
+uvloop==0.19.0
+    # via uvicorn
+watchfiles==0.21.0
+    # via uvicorn
+websockets==12.0
+    # via uvicorn
