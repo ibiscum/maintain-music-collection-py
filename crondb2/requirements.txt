@@ -6,7 +6,7 @@
 #
 greenlet==3.0.3
     # via sqlalchemy
-ibm-db==3.2.1
+ibm-db==3.2.3
     # via
     #   -r crondb2/requirements.in
     #   ibm-db-sa
