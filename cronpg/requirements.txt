@@ -8,5 +8,5 @@ psycopg2==2.9.9
     # via -r cronpg/requirements.in
 python-dotenv==1.0.1
     # via -r cronpg/requirements.in
-schedule==1.2.1
+schedule==1.2.2
     # via -r cronpg/requirements.in
