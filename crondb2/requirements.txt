@@ -10,7 +10,7 @@ ibm-db==3.2.3
     # via
     #   -r crondb2/requirements.in
     #   ibm-db-sa
-ibm-db-sa==0.4.0
+ibm-db-sa==0.4.1
     # via -r crondb2/requirements.in
 python-dotenv==1.0.1
     # via -r crondb2/requirements.in
