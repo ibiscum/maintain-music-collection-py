@@ -16,7 +16,5 @@ python-dotenv==1.0.1
     # via -r crondb2/requirements.in
 schedule==1.2.1
     # via -r crondb2/requirements.in
-sqlalchemy==2.0.24
+sqlalchemy==1.4.54
     # via ibm-db-sa
-typing-extensions==4.11.0
-    # via sqlalchemy
