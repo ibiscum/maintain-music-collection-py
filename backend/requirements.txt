@@ -92,7 +92,7 @@ pyyaml==6.0.1
     # via uvicorn
 rich==13.7.1
     # via typer
-schedule==1.2.1
+schedule==1.2.2
     # via -r backend/requirements.in
 shellingham==1.5.4
     # via typer

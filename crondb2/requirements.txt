@@ -14,7 +14,7 @@ ibm-db-sa==0.4.1
     # via -r crondb2/requirements.in
 python-dotenv==1.0.1
     # via -r crondb2/requirements.in
-schedule==1.2.1
+schedule==1.2.2
     # via -r crondb2/requirements.in
 sqlalchemy==1.4.54
     # via ibm-db-sa
