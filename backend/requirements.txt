@@ -73,5 +73,5 @@ typing-extensions==4.8.0
     #   fastapi
     #   pydantic
     #   pydantic-core
-uvicorn==0.29.0
+uvicorn==0.34.0
     # via -r backend/requirements.in
