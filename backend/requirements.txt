@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements.in
 #
+annotated-doc==0.0.4
+    # via fastapi
 annotated-types==0.6.0
     # via pydantic
 anyio==3.7.1
@@ -24,7 +26,7 @@ click==8.1.7
     # via uvicorn
 databases[postgresql]==0.8.0
     # via -r backend/requirements.in
-fastapi==0.115.6
+fastapi==0.123.0
     # via -r backend/requirements.in
 greenlet==3.0.1
     # via sqlalchemy
