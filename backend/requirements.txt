@@ -10,9 +10,7 @@ anyio==3.7.1
     # via
     #   httpx
     #   starlette
-async-timeout==4.0.3
-    # via asyncpg
-asyncpg==0.29.0
+asyncpg==0.31.0
     # via
     #   -r backend/requirements.in
     #   databases
